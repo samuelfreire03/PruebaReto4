@@ -99,7 +99,6 @@ while True:
 
     elif int(inputs[0]) == 2:
 
-
         print('\n' + 'Informacion grafo dirigido' + '\n')
         print('Numero de aeropuertos: ' + str(gr.numVertices(cont['rutas'])))
         print('Numero de rutas: ' + str(gr.numEdges(cont['rutas'])))
@@ -113,9 +112,6 @@ while True:
         print('\n' + 'Informacion ciudades' + '\n')
         print('Total de ciudades: ' + str(lt.size(cont['ciudades'])))
         print_ciudades(lt.lastElement(cont['ciudades']))
-
-
-
 
     elif int(inputs[0]) == 3:
         
