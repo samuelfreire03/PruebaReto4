@@ -26,6 +26,40 @@ import controller
 from DISClib.ADT import list as lt
 assert cf
 from DISClib.ADT.graph import gr
+from DISClib.ADT import map as mp
+from prettytable import PrettyTable
+
+def print_aeropuerto(author):
+    """
+    Imprime la información del autor seleccionado
+    """
+    if author == '':
+        print('No se encontraron artistas nacidos en el rango dado')
+    elif author:
+        print("\n")
+        x = PrettyTable(["Nombre", "Ciudad", 'Pais','Latitud','Longitud'])
+        x._max_width = {"Nombre" : 20, "Ciudad" : 20,"Pais" : 20, "Latitud" : 20,"Longitud" : 20}
+        x.add_row([author['Name']+'\n', author['City'], author['Country'],author['Latitude'],author['Longitude']])
+        print(x)
+        print("\n")
+    else:
+        print('No se encontro el autor.\n')
+
+def print_ciudades(author):
+    """
+    Imprime la información del autor seleccionado
+    """
+    if author == '':
+        print('No se encontraron artistas nacidos en el rango dado')
+    elif author:
+        print("\n")
+        x = PrettyTable(["Nombre", "Poblacion", 'Latitud','Longitud'])
+        x._max_width = {"Nombre" : 20, "Poblacion" : 20,"Latitud" : 20, "Longitud" : 20}
+        x.add_row([author['city']+'\n', author['population'], author['lat'],author['lng']])
+        print(x)
+        print("\n")
+    else:
+        print('No se encontro el autor.\n')
 
 
 """
@@ -58,14 +92,30 @@ while True:
     printMenu()
     inputs = input('Seleccione una opción para continuar\n')
     if int(inputs[0]) == 1:
+
         print("Cargando información de los archivos ....")
         cont = controller.init()
         controller.loadAirportsRutes(cont)
-        print(gr.numEdges(cont['rutas']))
 
     elif int(inputs[0]) == 2:
 
-        print('aqui se cargan los archivos')
+
+        print('\n' + 'Informacion grafo dirigido' + '\n')
+        print('Numero de aeropuertos: ' + str(gr.numVertices(cont['rutas'])))
+        print('Numero de rutas: ' + str(gr.numEdges(cont['rutas'])))
+        print_aeropuerto(controller.infoaeropuerto(cont,lt.firstElement(gr.vertices(cont['rutas']))))
+
+        print('\n' + 'Informacion grafo no dirigido' + '\n')
+        print('Numero de aeropuertos: ' + str(gr.numVertices(cont['rutas_idayretorno'])))
+        print('Numero de rutas: ' + str(gr.numEdges(cont['rutas_idayretorno'])))
+        print_aeropuerto(controller.infoaeropuerto(cont,lt.firstElement(gr.vertices(cont['rutas_idayretorno']))))
+
+        print('\n' + 'Informacion ciudades' + '\n')
+        print('Total de ciudades: ' + str(lt.size(cont['ciudades'])))
+        print_ciudades(lt.lastElement(cont['ciudades']))
+
+
+
 
     elif int(inputs[0]) == 3:
         

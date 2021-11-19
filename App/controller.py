@@ -23,6 +23,7 @@
 import config as cf
 import model
 import csv
+from DISClib.ADT import list as lt
 
 
 """
@@ -50,17 +51,34 @@ def loadAirportsRutes(analyzer):
     """
     airportsfile = cf.data_dir + 'Vuelos/airports_full.csv'
     rutasfile = cf.data_dir + 'Vuelos/routes_full.csv'
+    ciudaesfile = cf.data_dir + 'Vuelos/worldcities.csv'
+
     input_file_aeropuertos = csv.DictReader(open(airportsfile, encoding="utf-8"),
                                 delimiter=",")
+
     input_file_rutas = csv.DictReader(open(rutasfile, encoding="utf-8"),
                                 delimiter=",")
+
+    input_file_ciudades = csv.DictReader(open(ciudaesfile, encoding="utf-8"),
+                                delimiter=",")
+
     for aeropuerto in input_file_aeropuertos:
         model.addVerticeGrafo(analyzer,aeropuerto)
+
     for ruta in input_file_rutas:
         model.addRuta(analyzer,ruta)
+
+    for ciudad in input_file_ciudades:
+        model.addCiudad(analyzer,ciudad)
+
+    model.addRutaidayvuleta(analyzer)
 
 # Funciones para la carga de datos
 
 # Funciones de ordenamiento
 
 # Funciones de consulta sobre el catálogo
+
+def infoaeropuerto(analyzer,codigoAita):
+    informacion = model.infoaeropuerto(analyzer,codigoAita)
+    return informacion
