@@ -82,3 +82,19 @@ def loadAirportsRutes(analyzer):
 def infoaeropuerto(analyzer,codigoAita):
     informacion = model.infoaeropuerto(analyzer,codigoAita)
     return informacion
+
+def primer_req(analyzer):
+    """
+    Retorna los libros que fueron publicados
+    en un año
+    """
+    mayorruta = model.primer_req(analyzer)
+    return mayorruta
+
+def segundo_req(analyzer,codigo1,codigo2):
+    """
+    Retorna los libros que fueron publicados
+    en un año
+    """
+    conectados = model.segundo_req(analyzer,codigo1,codigo2)
+    return conectados

@@ -54,7 +54,9 @@ def newAnalyzer():
     analyzer = {
                     'rutas': None,
                     'rutas_idayretorno': None,
-                    'infoaeropuertos': None
+                    'infoaeropuertos': None,
+                    'componentes_grafo_dirigdo': None,
+                    'rutasconaerolineas': None
                 }
 
     analyzer['rutas'] = gr.newGraph(datastructure='ADJ_LIST',
@@ -67,11 +69,18 @@ def newAnalyzer():
                                               size=9100,
                                               comparefunction=compareStopIds)
     
-    analyzer["infoaeropuertos"] = mp.newMap(150000,
+    analyzer["infoaeropuertos"] = mp.newMap(9100,
                                    maptype='CHAINING',
                                    loadfactor=4.0)
     
     analyzer['ciudades'] = lt.newList('ARRAY_LIST',compareCiudades)
+
+    analyzer['rutasconaerolineas'] = gr.newGraph(datastructure='ADJ_LIST',
+                                              directed=True,
+                                              size=9100,
+                                              comparefunction=compareStopIds)
+
+    analyzer['aeropuertosinfolista'] = lt.newList('ARRAY_LIST',compareCiudades)
 
     return analyzer
 
@@ -81,11 +90,15 @@ def addVerticeGrafo(analyzer, aeropuerto):
 
     addStop(analyzer, aeropuerto['IATA'])
     mp.put(analyzer["infoaeropuertos"], aeropuerto['IATA'], aeropuerto)
+    lt.addLast(analyzer['aeropuertosinfolista'], aeropuerto)
 
 def addStop(analyzer, aeropuerto_identificador):
 
     if not gr.containsVertex(analyzer['rutas'], aeropuerto_identificador):
         gr.insertVertex(analyzer['rutas'], aeropuerto_identificador)
+
+    if not gr.containsVertex(analyzer['rutasconaerolineas'], aeropuerto_identificador):
+        gr.insertVertex(analyzer['rutasconaerolineas'], aeropuerto_identificador)
 
 def addStopidayvuelta(analyzer, aeropuerto_identificador):
 
@@ -93,19 +106,28 @@ def addStopidayvuelta(analyzer, aeropuerto_identificador):
         gr.insertVertex(analyzer['rutas_idayretorno'], aeropuerto_identificador)
 
 def addRuta(analyzer, aeropuerto_identificador):
-
+    
     gr.addEdge(analyzer['rutas'],aeropuerto_identificador['Departure'],aeropuerto_identificador['Destination'],float(aeropuerto_identificador['distance_km']))
+    existe_arco_ida = gr.getEdge(analyzer['rutasconaerolineas'],aeropuerto_identificador['Departure'],aeropuerto_identificador['Destination'])
+    existe_arco_vuelta = gr.getEdge(analyzer['rutasconaerolineas'],aeropuerto_identificador['Destination'],aeropuerto_identificador['Departure'])
+    if existe_arco_ida is None and existe_arco_vuelta is None:
+        gr.addEdge(analyzer['rutasconaerolineas'],aeropuerto_identificador['Departure'],aeropuerto_identificador['Destination'],float(aeropuerto_identificador['distance_km']))
+
 
 def addRutaidayvuleta(analyzer):
 
-    arcos_total = gr.edges(analyzer['rutas'])
-    for arco in lt.iterator(arcos_total):
-        lista_adjacentes = gr.adjacentEdges(analyzer['rutas'],arco['vertexA'])
-        for arco1 in lt.iterator(lista_adjacentes):
-            if arco['vertexA'] == arco1['vertexB']:
-                addStopidayvuelta(analyzer,arco['vertexA'])
-                addStopidayvuelta(analyzer,arco['vertexB'])
-                gr.addEdge(analyzer['rutas_idayretorno'],arco['vertexA'],arco['vertexB'],float(arco['weight']))
+    vertices_total = gr.vertices(analyzer['rutas'])
+    for vertices in lt.iterator(vertices_total):
+        lista_adjacentes = gr.adjacents(analyzer['rutas'],vertices)
+        for vertice in lt.iterator(lista_adjacentes):
+            lista_arcos = gr.adjacentEdges(analyzer['rutas'],vertice)
+            for arco in lt.iterator(lista_arcos):
+                if arco['vertexB'] == vertices:
+                    addStopidayvuelta(analyzer,arco['vertexA'])
+                    addStopidayvuelta(analyzer,arco['vertexB'])
+                    existe_arco = gr.getEdge(analyzer['rutas_idayretorno'],arco['vertexA'],arco['vertexB'])
+                    if existe_arco is None:
+                        gr.addEdge(analyzer['rutas_idayretorno'],arco['vertexA'],arco['vertexB'],float(arco['weight']))
 
 def addCiudad(analyzer,ciudad):
 
@@ -120,7 +142,6 @@ def infoaeropuerto(analyzer,codigoAita):
     llave_valor = mp.get(analyzer['infoaeropuertos'],codigoAita)
     informacion = me.getValue(llave_valor)
     return informacion
-
 
 # Funciones utilizadas para comparar elementos dentro de una lista
 
@@ -148,3 +169,43 @@ def compareCiudades(id1, id2):
         return -1
 
 # Funciones de ordenamiento
+
+#Funciones de requerimientos
+
+def primer_req(analyzer):
+
+#GRAFO DIRIGIDO
+    vertices_total = gr.vertices(analyzer['rutasconaerolineas'])
+    mayor_numero1 = 0
+    mayor_aeropuerto1 = None
+    for vertice in lt.iterator(vertices_total):
+        entran = gr.indegree(analyzer['rutasconaerolineas'],vertice)
+        salen = gr.outdegree(analyzer['rutasconaerolineas'],vertice)
+        total_rutas = entran + salen
+        if float(total_rutas) > mayor_numero1:
+            mayor_numero1 = float(total_rutas)
+            mayor_aeropuerto1 = vertice
+    llave_valor_vertice = mp.get(analyzer['rutasconaerolineas']['vertices'], mayor_aeropuerto1)
+    lst1 = me.getValue(llave_valor_vertice)
+    info_mayor1 = me.getValue(mp.get(analyzer['infoaeropuertos'],mayor_aeropuerto1))
+
+#GRAFO NO DIRIGIDO
+    vertices_total_no = gr.vertices(analyzer['rutas_idayretorno'])
+    mayor_numero2 = 0
+    mayor_aeropuerto2 = None
+    for vertice_no in lt.iterator(vertices_total_no):
+        total_rutas1 = gr.degree(analyzer['rutas_idayretorno'],vertice_no)
+        if float(total_rutas1) > mayor_numero2:
+            mayor_numero2 = float(total_rutas1)
+            mayor_aeropuerto2 = vertice_no
+    llave_valor_vertice1 = mp.get(analyzer['rutas_idayretorno']['vertices'], mayor_aeropuerto2)
+    lst2 = me.getValue(llave_valor_vertice1)
+    info_mayor2 = me.getValue(mp.get(analyzer['infoaeropuertos'],mayor_aeropuerto2))
+    return mayor_numero1,info_mayor1,mayor_numero2,info_mayor2
+
+def segundo_req(analyzer,codigo1,codigo2):
+
+    analyzer['componentes_grafo_dirigdo'] = scc.KosarajuSCC(analyzer['rutas'])
+    numero_componentes = scc.connectedComponents(analyzer['componentes_grafo_dirigdo'])
+    conectados = scc.stronglyConnected(analyzer['componentes_grafo_dirigdo'],codigo1,codigo2)
+    return numero_componentes,conectados

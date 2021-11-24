@@ -27,7 +27,10 @@ from DISClib.ADT import list as lt
 assert cf
 from DISClib.ADT.graph import gr
 from DISClib.ADT import map as mp
+from DISClib.DataStructures import mapentry as me
 from prettytable import PrettyTable
+
+sys.setrecursionlimit(20000)
 
 def print_aeropuerto(author):
     """
@@ -95,31 +98,55 @@ while True:
 
         print("Cargando información de los archivos ....")
         cont = controller.init()
-        controller.loadAirportsRutes(cont)
 
     elif int(inputs[0]) == 2:
 
-        print('\n' + 'Informacion grafo dirigido' + '\n')
+        controller.loadAirportsRutes(cont)
+        print('\n' +('-'*20)+ 'Informacion grafo dirigido' +('-'*20)+ '\n')
         print('Numero de aeropuertos: ' + str(gr.numVertices(cont['rutas'])))
         print('Numero de rutas: ' + str(gr.numEdges(cont['rutas'])))
+        print('\n' + 'Primer aeropuerto del grafo' + '\n')
         print_aeropuerto(controller.infoaeropuerto(cont,lt.firstElement(gr.vertices(cont['rutas']))))
 
-        print('\n' + 'Informacion grafo no dirigido' + '\n')
+        print('\n' +('-'*20)+ 'Informacion grafo no dirigido' +('-'*20)+ '\n')
         print('Numero de aeropuertos: ' + str(gr.numVertices(cont['rutas_idayretorno'])))
         print('Numero de rutas: ' + str(gr.numEdges(cont['rutas_idayretorno'])))
+        print('\n' + 'Primer aeropuerto del grafo' + '\n')
         print_aeropuerto(controller.infoaeropuerto(cont,lt.firstElement(gr.vertices(cont['rutas_idayretorno']))))
 
-        print('\n' + 'Informacion ciudades' + '\n')
+        print('\n' +('-'*20)+ 'Informacion grafo dirigido solo con una direccion y sin repeticion' +('-'*20)+ '\n')
+        print('Numero de aeropuertos: ' + str(gr.numVertices(cont['rutasconaerolineas'])))
+        print('Numero de rutas: ' + str(gr.numEdges(cont['rutasconaerolineas'])))
+        print('\n' + 'Primer aeropuerto del grafo' + '\n')
+        print_aeropuerto(controller.infoaeropuerto(cont,lt.firstElement(gr.vertices(cont['rutasconaerolineas']))))
+
+        print('\n' +('-'*20)+ 'Informacion ciudades' +('-'*20)+ '\n')
         print('Total de ciudades: ' + str(lt.size(cont['ciudades'])))
+        print('\n' + 'Ultima ciudad cargada' + '\n')
         print_ciudades(lt.lastElement(cont['ciudades']))
 
+        print('\n' + 'Primer aeropuerto del archivo' + '\n')
+        print_aeropuerto(lt.firstElement(cont['aeropuertosinfolista']))
+
     elif int(inputs[0]) == 3:
-        
-        print('aqui se ve a presentar la lista de areopuertos y el numero de aeropuertos conectados')
+
+        respuesta = controller.primer_req(cont)
+        print('aqui se ve a presentar la lista de areopuertos y el numero de aeropuertos conectados del grafo dirigido')
+        print('\n' + 'El numero de aeropuertos conectados es de:' + str(respuesta[0]))
+        print_aeropuerto(respuesta[1])
+
+        print('aqui se ve a presentar la lista de areopuertos y el numero de aeropuertos conectados del grafo no dirigido')
+        print('\n' + 'El numero de aeropuertos conectados es de:' + str(respuesta[2]))
+        print_aeropuerto(respuesta[3])
 
     elif int(inputs[0]) == 4:
         
         print('aqui se ve a presentar el cluster prsente en la red de aeropuertos y una comparacion')
+        codigo1 = input('Escriba el codigo del primer aeropuerto')
+        codigo2 = input('Escriba el codigo del segundo aeropuerto')
+        respuesta = controller.segundo_req(cont,codigo1,codigo2)
+        print('\n' + 'El numero de elementos fuertemente conectados es de:' + str(respuesta[0]))
+        print('\n' + 'Los dos vertices estan fuertemente conectados:' + str(respuesta[1]))
 
     elif int(inputs[0]) == 5:
         
