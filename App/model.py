@@ -32,6 +32,7 @@ from DISClib.ADT import map as mp
 from DISClib.Algorithms.Graphs import scc
 from DISClib.DataStructures import mapentry as me
 from DISClib.Algorithms.Graphs import dijsktra as djk
+from DISClib.Algorithms.Graphs import prim as pr
 from DISClib.Utils import error as error
 assert config
 
@@ -209,3 +210,46 @@ def segundo_req(analyzer,codigo1,codigo2):
     numero_componentes = scc.connectedComponents(analyzer['componentes_grafo_dirigdo'])
     conectados = scc.stronglyConnected(analyzer['componentes_grafo_dirigdo'],codigo1,codigo2)
     return numero_componentes,conectados
+
+def cuarto_req(analyzer,codigo1,millas):
+
+#Respuesta maxima para recorrer
+    kilometros = float(millas) * 1.60
+    caminos = djk.Dijkstra(analyzer['rutas'], codigo1)
+    nodos = mp.size(caminos['visited'])
+    vertices_mapa = mp.keySet(caminos['visited'])
+    respuesta = None
+    mayor = 0
+    total = 0
+    mayor_lista = 0
+    for c in lt.iterator(caminos['iminpq']['elements']):
+        total += float(c['index'])
+        if djk.hasPathTo(caminos, c['key']) is True:
+            camino_revisar = djk.pathTo(caminos, c['key'])
+            cantidad = lt.size(camino_revisar)
+            if float(c['index']) > mayor and kilometros > float(c['index']) and cantidad > mayor_lista:
+                mayor = float(c['index']) 
+                respuesta = c['key']
+                mayor_lista = cantidad
+
+#camino mas largo
+    camino = djk.pathTo(caminos, respuesta)
+    mayor_distacnia = 0
+    lista = None
+    for j in lt.iterator(vertices_mapa):
+        if djk.hasPathTo(caminos, j) is True:
+            camino_revisar = djk.pathTo(caminos, j)
+            cantidad = lt.size(camino_revisar)
+            if cantidad > mayor_distacnia:
+                mayor_distacnia =  cantidad
+                lista = camino_revisar
+
+#informacion de ciudades
+
+    ciudades = lt.newList('ARRAY_LIST')
+    for aeropuerto in lt.iterator(camino):
+        informacion = me.getValue(mp.get(analyzer['infoaeropuertos'],aeropuerto['vertexB']))
+        ciudad = informacion['City']
+        lt.addLast(ciudades,ciudad)
+
+    return nodos,total,lista,ciudades

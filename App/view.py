@@ -29,6 +29,7 @@ from DISClib.ADT.graph import gr
 from DISClib.ADT import map as mp
 from DISClib.DataStructures import mapentry as me
 from prettytable import PrettyTable
+from DISClib.Algorithms.Graphs import prim as pr
 
 sys.setrecursionlimit(20000)
 
@@ -151,6 +152,17 @@ while True:
     elif int(inputs[0]) == 5:
         
         print('aqui se ve a presentar lla ruta mas corta entre dos ciudades')
+        codigo1 = input('Escriba el codigo del primer aeropuerto')
+        millas = input('Escriba la cantidad de millas qeu tiene')
+        respuesta = controller.cuarto_req(cont,codigo1,millas)
+        print('\n' + 'El numero de nodos en la red es de:' + str(respuesta[0]))
+        print('\n' + 'El costo total de la red de exapnasion minima es de:' + str(respuesta[1]))
+        print('\n' + 'La rama mas larga es la siguiente:')
+        for c in lt.iterator(respuesta[2]):
+            print(c)
+        print('\n' + 'Las ciudades que se pueden visitar son:')
+        for c in lt.iterator(respuesta[3]):
+            print(c)
 
     elif int(inputs[0]) == 6:
         
