@@ -114,3 +114,19 @@ def quinto_req(analyzer,codigo1):
     """
     conectados = model.quinto_req(analyzer,codigo1)
     return conectados
+
+def opciones_ciudades(analyzer,ciudad):
+    """
+    Retorna los libros que fueron publicados
+    en un año
+    """
+    ciudades = model.opciones_ciudades(analyzer,ciudad)
+    return ciudades
+
+def aeropuertoopciones(analyzer,ciudad):
+    """
+    Retorna los libros que fueron publicados
+    en un año
+    """
+    aeropuertos = model.aeropuertoopciones(analyzer,ciudad)
+    return aeropuertos

@@ -31,10 +31,21 @@ from DISClib.ADT import list as lt
 from DISClib.ADT import map as mp
 from DISClib.Algorithms.Graphs import scc
 from DISClib.DataStructures import mapentry as me
+from DISClib.Algorithms.Sorting import mergesort as merge
 from DISClib.Algorithms.Graphs import dijsktra as djk
 from DISClib.Algorithms.Graphs import prim as pr
 from DISClib.Utils import error as error
 assert config
+import math
+
+def haversine(lat1, lon1, lat2, lon2):
+    rad=math.pi/180
+    dlat=lat2-lat1
+    dlon=lon2-lon1
+    R=6372.795477598
+    a=(math.sin(rad*dlat/2))**2 + math.cos(rad*lat1)*math.cos(rad*lat2)*(math.sin(rad*dlon/2))**2
+    distancia=2*R*math.asin(math.sqrt(a))
+    return distancia
 
 """
 Se define la estructura de un catálogo de videos. El catálogo tendrá dos listas, una para los videos, otra para las categorias de
@@ -83,6 +94,14 @@ def newAnalyzer():
 
     analyzer['aeropuertosinfolista'] = lt.newList('ARRAY_LIST',compareCiudades)
 
+    analyzer["infociudadesrepetidas"] = mp.newMap(9100,
+                                   maptype='CHAINING',
+                                   loadfactor=4.0)
+
+    analyzer["aeropuertosenciudades"] = mp.newMap(9100,
+                                   maptype='CHAINING',
+                                   loadfactor=4.0)
+
     return analyzer
 
 # Funciones para agregar informacion al catalogo
@@ -92,6 +111,7 @@ def addVerticeGrafo(analyzer, aeropuerto):
     addStop(analyzer, aeropuerto['IATA'])
     mp.put(analyzer["infoaeropuertos"], aeropuerto['IATA'], aeropuerto)
     lt.addLast(analyzer['aeropuertosinfolista'], aeropuerto)
+    addaeropuertoenciudad(analyzer,aeropuerto['City'],aeropuerto)
 
 def addStop(analyzer, aeropuerto_identificador):
 
@@ -130,11 +150,64 @@ def addRutaidayvuleta(analyzer):
                     if existe_arco is None:
                         gr.addEdge(analyzer['rutas_idayretorno'],arco['vertexA'],arco['vertexB'],float(arco['weight']))
 
-def addCiudad(analyzer,ciudad):
+def addCiudad(analyzer, ciudad):
 
     lt.addLast(analyzer['ciudades'], ciudad)
+    addCiudadRepetida(analyzer, ciudad['city'].strip(), ciudad)
+
+def addCiudadRepetida(analyzer, ciudad_nombre, ciudad):
+    """
+    Esta función adiciona un libro a la lista de libros publicados
+    por un autor.
+    Cuando se adiciona el libro se actualiza el promedio de dicho autor
+    """
+    authors = analyzer['infociudadesrepetidas']
+    existauthor = mp.contains(authors, ciudad_nombre)
+    if existauthor:
+        entry = mp.get(authors, ciudad_nombre)
+        author = me.getValue(entry)
+    else:
+        author = newciudad(ciudad_nombre)
+        mp.put(authors, ciudad_nombre, author)
+    lt.addLast(author['repetidas'], ciudad)
+
+def addaeropuertoenciudad(analyzer, aeropuerto_nombre, aeropuerto):
+    """
+    Esta función adiciona un libro a la lista de libros publicados
+    por un autor.
+    Cuando se adiciona el libro se actualiza el promedio de dicho autor
+    """
+    authors = analyzer['aeropuertosenciudades']
+    existauthor = mp.contains(authors, aeropuerto_nombre)
+    if existauthor:
+        entry = mp.get(authors, aeropuerto_nombre)
+        author = me.getValue(entry)
+    else:
+        author = newciudad(aeropuerto_nombre)
+        mp.put(authors, aeropuerto_nombre, author)
+    lt.addLast(author['repetidas'], aeropuerto)
 
 # Funciones para creacion de datos
+
+def newciudad(pubyear):
+    """
+    Esta funcion crea la estructura de libros asociados
+    a un año.
+    """
+    entry = {'Ciudad': "", "repetidas": None}
+    entry['Ciudad'] = pubyear
+    entry['repetidas'] = lt.newList('ARRAY_LIST', compareYears)
+    return entry
+
+def newaeropuerto(pubyear,distancia):
+    """
+    Esta funcion crea la estructura de libros asociados
+    a un año.
+    """
+    entry = {'aeropuerto': "", "distancias": ''}
+    entry['aeropuerto'] = pubyear
+    entry['distancias'] = distancia
+    return entry
 
 # Funciones de consulta
 
@@ -169,7 +242,25 @@ def compareCiudades(id1, id2):
     else:
         return -1
 
+def compareYears(year1, year2):
+    if (int(year1) == int(year2)):
+        return 0
+    elif (int(year1) > int(year2)):
+        return 1
+    else:
+        return 0
+
+def comparedistancias(ciudad1, ciudad2):
+    fecha1 = ciudad1['distancias']
+    fecha2 = ciudad2['distancias']
+    return float(fecha1) < float(fecha2)
+
 # Funciones de ordenamiento
+
+def sortcomparedistancias(catalog):
+
+    sorted_list = merge.sort(catalog, comparedistancias)
+    return sorted_list
 
 #Funciones de requerimientos
 
@@ -270,3 +361,26 @@ def quinto_req(analyzer,codigo1):
             lt.addLast(lista_aeropuetos,c['vertexA']) 
 
     return total_rutas,lista_aeropuetos
+
+def opciones_ciudades(analyzer,ciudad):
+
+    lista_opciones_origen = mp.get(analyzer['infociudadesrepetidas'],ciudad)
+
+    return lista_opciones_origen
+
+def aeropuertoopciones(analyzer,ciudad):
+
+    longitud = float(ciudad['lng'])
+    latitud = float(ciudad['lat'])
+    lista_distancias = lt.newList('ARRAY_LIST')
+    llave_valor = mp.get(analyzer['aeropuertosenciudades'],ciudad['city'])
+    lista_aeropuertos = me.getValue(llave_valor)['repetidas']
+    for c in lt.iterator(lista_aeropuertos):
+        lat_aeropuerto = float(c['Latitude'])
+        long_aeropuerto = float(c['Longitude'])
+        distancia = haversine(latitud,longitud,lat_aeropuerto,long_aeropuerto)
+        aeropuerto_dist = newaeropuerto(c['IATA'],distancia)
+        lt.addLast(lista_distancias,aeropuerto_dist)
+    orden = sortcomparedistancias(lista_distancias)
+    aeropuerto_cercano = lt.firstElement(orden)
+    return aeropuerto_cercano

@@ -65,6 +65,39 @@ def print_ciudades(author):
     else:
         print('No se encontro el autor.\n')
 
+def print_opciones(author):
+    """
+    Imprime la información del autor seleccionado
+    """
+    if author:
+        print("\n")
+        x = PrettyTable(["Opcion","Ciudad", "Pais",'Admin','Latitud','Longitud'])
+        x._max_width = {"Opcion" : 20,"Ciudad" : 20, "Pais" : 20, "Admin" : 20,"Latitud" : 20,"Longitud" : 20}
+        numero = 1
+        for artistas in lt.iterator(me.getValue(author)['repetidas']):
+            x.add_row([numero, artistas['city'],artistas['country'],artistas['admin_name'],artistas['lat'],artistas['lng']])
+            numero += 1
+        print(x)
+        print("\n")
+    else:
+        print('No se encontro el autor.\n')
+
+def print_ciudades_opciones(author):
+    """
+    Imprime la información del autor seleccionado
+    """
+    if author == '':
+        print('No se encontraron artistas nacidos en el rango dado')
+    elif author:
+        print("\n")
+        x = PrettyTable(["Nombre","Pais","Admin","Poblacion", 'Latitud','Longitud'])
+        x._max_width = {"Nombre" : 20,"Pais" : 20,"Admin" : 20, "Poblacion" : 20,"Latitud" : 20, "Longitud" : 20}
+        x.add_row([author['city']+'\n', author['country'],author['admin_name'],author['population'], author['lat'],author['lng']])
+        print(x)
+        print("\n")
+    else:
+        print('No se encontro el autor.\n')
+
 
 """
 La vista se encarga de la interacción con el usuario
@@ -81,7 +114,7 @@ def printMenu():
     print("2- Cargar información de archivos de vuelos")
     print("3- Encontrar puntos de interconexión aérea")
     print("4- Encontrar clústeres de tráfico aéreo")
-    print("5- Encontrar la ruta más corta entre ciudades")
+    print("5- ----------------ADELANTO REQUERIMIENTO TRES---------")
     print("6- Utilizar las millas de viajero")
     print("7- Cuantificar el efecto de un aeropuerto cerrado")
     print("0- Salir")
@@ -152,6 +185,25 @@ while True:
     elif int(inputs[0]) == 5:
         
         print('aqui se ve a presentar lla ruta mas corta entre dos ciudades')
+#ORIGEN -------------------------------------------------------------------------------------------------
+        ciudad1 = input('Escriba el nombre de la ciudad de origen')
+        opcion_origen = controller.opciones_ciudades(cont,ciudad1)
+        print_opciones(opcion_origen)
+        ciudad_origen = input('Escriba la opcion de la tabla de arriba que desea buscar')
+        info_ciudad_origen = lt.getElement(me.getValue(opcion_origen)['repetidas'],int(ciudad_origen))
+        print_ciudades_opciones(info_ciudad_origen)
+        aeropuerto1 = controller.aeropuertoopciones(cont,info_ciudad_origen)
+        print('\n' + 'El aeropuerto de salida seleccionado es:' + str(aeropuerto1['aeropuerto']))
+
+#DESTINO-------------------------------------------------------------------------------------------------
+        ciudad2 = input('Escriba el nombre de la ciudad de destino')
+        opcion_destino = controller.opciones_ciudades(cont,ciudad2)
+        print_opciones(opcion_destino)
+        ciudad_destino = input('Escriba la opcion de la tabla de arriba que desea buscar')
+        info_ciudad_destino = lt.getElement(me.getValue(opcion_destino)['repetidas'],int(ciudad_destino))
+        print_ciudades_opciones(info_ciudad_destino)
+        aeropuerto2 = controller.aeropuertoopciones(cont,info_ciudad_destino)
+        print('\n' + 'El aeropuerto de destino seleccionado es:' + str(aeropuerto2['aeropuerto']))
 
     elif int(inputs[0]) == 6:
         
