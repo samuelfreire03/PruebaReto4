@@ -253,3 +253,20 @@ def cuarto_req(analyzer,codigo1,millas):
         lt.addLast(ciudades,ciudad)
 
     return nodos,total,lista,ciudades
+
+def quinto_req(analyzer,codigo1):
+
+    entran = gr.indegree(analyzer['rutasconaerolineas'],codigo1)
+    salen = gr.outdegree(analyzer['rutasconaerolineas'],codigo1)
+    total_rutas = entran + salen
+
+    arcos_totales = gr.edges(analyzer['rutasconaerolineas'])
+
+    lista_aeropuetos = lt.newList('ARRAY_LIST')
+    for c in lt.iterator(arcos_totales):
+        if c['vertexA'] == codigo1:
+            lt.addLast(lista_aeropuetos,c['vertexB'])
+        if c['vertexB'] == codigo1:
+            lt.addLast(lista_aeropuetos,c['vertexA']) 
+
+    return total_rutas,lista_aeropuetos

@@ -152,6 +152,10 @@ while True:
     elif int(inputs[0]) == 5:
         
         print('aqui se ve a presentar lla ruta mas corta entre dos ciudades')
+
+    elif int(inputs[0]) == 6:
+        
+        print('aqui se ve a presentar la red expansion minima')
         codigo1 = input('Escriba el codigo del primer aeropuerto')
         millas = input('Escriba la cantidad de millas qeu tiene')
         respuesta = controller.cuarto_req(cont,codigo1,millas)
@@ -164,13 +168,14 @@ while True:
         for c in lt.iterator(respuesta[3]):
             print(c)
 
-    elif int(inputs[0]) == 6:
-        
-        print('aqui se ve a presentar la red expansion minima')
-
     elif int(inputs[0]) == 7:
         
-        print('aqui se ve a presentar la afectacion de un vuelo')
+        codigo1 = input('Escriba el codigo del primer aeropuerto')
+        respuesta = controller.quinto_req(cont,codigo1)
+        print('\n' + 'El numero de aeropuertos afectados es de:' + str(respuesta[0]))
+        print('\n' + 'La lista de aeropuertos afectados es la siguiente:')
+        for c in lt.iterator(respuesta[1]):
+            print(c)
 
     else:
         sys.exit(0)

@@ -106,3 +106,11 @@ def cuarto_req(analyzer,codigo1,millas):
     """
     caminos = model.cuarto_req(analyzer,codigo1,millas)
     return caminos
+
+def quinto_req(analyzer,codigo1):
+    """
+    Retorna los libros que fueron publicados
+    en un año
+    """
+    conectados = model.quinto_req(analyzer,codigo1)
+    return conectados
