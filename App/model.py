@@ -365,27 +365,22 @@ def segundo_req(analyzer,codigo1,codigo2):
 
 def cuarto_req(analyzer,codigo1,millas):
 
-#Respuesta maxima para recorrer
     kilometros = float(millas) * 1.60
-    caminos = djk.Dijkstra(analyzer['rutas'], codigo1)
-    nodos = mp.size(caminos['visited'])
-    vertices_mapa = mp.keySet(caminos['visited'])
-    respuesta = None
-    mayor = 0
-    total = 0
-    mayor_lista = 0
-    for c in lt.iterator(caminos['iminpq']['elements']):
-        total += float(c['index'])
-        if djk.hasPathTo(caminos, c['key']) is True:
-            camino_revisar = djk.pathTo(caminos, c['key'])
-            cantidad = lt.size(camino_revisar)
-            if float(c['index']) > mayor and kilometros > float(c['index']) and cantidad > mayor_lista:
-                mayor = float(c['index']) 
-                respuesta = c['key']
-                mayor_lista = cantidad
+
+#Respuesta maxima para recorrer
+
+    search = pr.PrimMST(analyzer['rutas_idayretorno'])
+    edge = pr.edgesMST(analyzer['rutas_idayretorno'], search)
+    nodos_red_expansion = lt.size(edge['mst'])
+
+    suma = 0
+    for c in lt.iterator(mp.valueSet(edge['distTo'])):
+        suma += c
 
 #camino mas largo
-    camino = djk.pathTo(caminos, respuesta)
+
+    caminos = djk.Dijkstra(analyzer['rutas_idayretorno'], codigo1)
+    vertices_mapa = mp.keySet(caminos['visited'])
     mayor_distacnia = 0
     lista = None
     for j in lt.iterator(vertices_mapa):
@@ -393,10 +388,23 @@ def cuarto_req(analyzer,codigo1,millas):
             camino_revisar = djk.pathTo(caminos, j)
             cantidad = lt.size(camino_revisar)
             if cantidad > mayor_distacnia:
-                mayor_distacnia =  cantidad
+                mayor_distacnia = cantidad
                 lista = camino_revisar
+#FALTANTE O RESTANTE
 
-    return nodos,total,lista
+    costo_total = 0
+    for arcos in lt.iterator(lista):
+        costo_total += arcos['weight']
+
+    if kilometros > float(costo_total):
+        resta = (kilometros - float(costo_total))/1.6
+        respuesta = 'sobran ' + str(resta) + ' '
+
+    if float(costo_total) > kilometros:
+        resta = (float(costo_total) - kilometros)/1.6
+        respuesta = 'faltan ' + str(resta) + ' '
+
+    return nodos_red_expansion,round(suma,2),lista,respuesta
 
 def quinto_req(analyzer,codigo):
 

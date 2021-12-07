@@ -134,6 +134,23 @@ def print_aeropuerto_LISTA(aeropuertos):
     else:
         print('No se encontro el autor.\n')
 
+def print_camino(aeropuertos):
+    """
+    Imprime la información del autor seleccionado
+    """
+    if aeropuertos == '':
+        print('No se encontraron artistas nacidos en el rango dado')
+    elif aeropuertos:
+        print("\n")
+        x = PrettyTable(["Salida",'Llegada','Distancia'])
+        x._max_width = {"Salida" : 20, "Llegada" : 20,"Distancia" : 20}
+        for aeropuerto in lt.iterator(aeropuertos):
+            x.add_row([aeropuerto['vertexA']+'\n', aeropuerto['vertexB'], aeropuerto['weight']])
+        print(x)
+        print("\n")
+    else:
+        print('No se encontro el autor.\n')
+
 
 """
 La vista se encarga de la interacción con el usuario
@@ -248,11 +265,8 @@ while True:
         codigo1 = input('Escriba el codigo del primer aeropuerto')
         millas = input('Escriba la cantidad de millas qeu tiene')
         respuesta = controller.cuarto_req(cont,codigo1,millas)
-        print('\n' + 'El numero de nodos en la red es de:' + str(respuesta[0]))
-        print('\n' + 'El costo total de la red de exapnasion minima es de:' + str(respuesta[1]))
-        print('\n' + 'La rama mas larga es la siguiente:')
-        for c in lt.iterator(respuesta[2]):
-            print(c)
+        print_camino(respuesta[2])
+        print('\n' + respuesta[3] + 'millas para la ruta mas larga')
 
     elif int(inputs[0]) == 7:
         
