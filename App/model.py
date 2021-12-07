@@ -312,6 +312,7 @@ def primer_req(analyzer):
 
 #GRAFO DIRIGIDO
     vertices_total = gr.vertices(analyzer['rutas'])
+    lista_final = lt.newList('ARRAY_LIST')
     lista_canitdad_digrafo = lt.newList('ARRAY_LIST')
     for vertice in lt.iterator(vertices_total):
         entran = gr.indegree(analyzer['rutas'],vertice)
@@ -319,6 +320,7 @@ def primer_req(analyzer):
         total_rutas = entran + salen
         cantidad = newcantidad(vertice,total_rutas,entran,salen)
         lt.addLast(lista_canitdad_digrafo,cantidad)
+        lt.addLast(lista_final,cantidad)
     orden = sortcomparecanitdades(lista_canitdad_digrafo)
     primeros5 = lt.subList(orden,1,5)
     conectados_numero_interno = lt.newList('ARRAY_LIST')
@@ -328,17 +330,31 @@ def primer_req(analyzer):
 
 #GRAFO NO DIRIGIDO
     vertices_total_no = gr.vertices(analyzer['rutas_idayretorno'])
-    mayor_numero2 = 0
-    mayor_aeropuerto2 = None
+    lista_canitdad_grafo = lt.newList('ARRAY_LIST')
     for vertice_no in lt.iterator(vertices_total_no):
-        total_rutas1 = gr.degree(analyzer['rutas_idayretorno'],vertice_no)
-        if float(total_rutas1) > mayor_numero2:
-            mayor_numero2 = float(total_rutas1)
-            mayor_aeropuerto2 = vertice_no
-    llave_valor_vertice1 = mp.get(analyzer['rutas_idayretorno']['vertices'], mayor_aeropuerto2)
-    lst2 = me.getValue(llave_valor_vertice1)
-    info_mayor2 = me.getValue(mp.get(analyzer['infoaeropuertos'],mayor_aeropuerto2))
-    return conectados_numero_interno,primeros5,mayor_numero2,info_mayor2
+        entran = gr.degree(analyzer['rutas_idayretorno'],vertice_no)
+        salen = gr.degree(analyzer['rutas_idayretorno'],vertice_no)
+        total_rutas = entran + salen
+        cantidad = newcantidad(vertice_no,total_rutas,entran,salen)
+        lt.addLast(lista_canitdad_grafo,cantidad)
+        lt.addLast(lista_final,cantidad)
+    orden_no = sortcomparecanitdades(lista_canitdad_grafo)
+    primeros5_no = lt.subList(orden_no,1,5)
+    conectados_numero_interno_no = lt.newList('ARRAY_LIST')
+    for c in lt.iterator(orden_no):
+        if c['cantidadtotal'] != 0:
+            lt.addLast(conectados_numero_interno_no,c)
+
+#Orden total
+
+    orden_final = sortcomparecanitdades(lista_final)
+    primeros5_final = lt.subList(orden_final,1,5)
+    conectados_numero_interno_final = lt.newList('ARRAY_LIST')
+    for c in lt.iterator(orden_final):
+        if c['cantidadtotal'] != 0:
+            lt.addLast(conectados_numero_interno_final,c)
+
+    return conectados_numero_interno,primeros5,conectados_numero_interno_no,primeros5_no,conectados_numero_interno_final,primeros5_final
 
 def segundo_req(analyzer,codigo1,codigo2):
 

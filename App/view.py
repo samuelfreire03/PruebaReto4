@@ -177,20 +177,23 @@ while True:
         print('Numero de rutas: ' + str(gr.numEdges(cont['rutas'])))
         print('\n' + 'Primer aeropuerto del grafo' + '\n')
         print_aeropuerto(controller.infoaeropuerto(cont,lt.firstElement(gr.vertices(cont['rutas']))))
+        print('\n' + 'Ultimo aeropuerto del grafo' + '\n')
+        print_aeropuerto(controller.infoaeropuerto(cont,lt.lastElement(gr.vertices(cont['rutas']))))
 
         print('\n' +('-'*20)+ 'Informacion grafo no dirigido' +('-'*20)+ '\n')
         print('Numero de aeropuertos: ' + str(gr.numVertices(cont['rutas_idayretorno'])))
         print('Numero de rutas: ' + str(gr.numEdges(cont['rutas_idayretorno'])))
         print('\n' + 'Primer aeropuerto del grafo' + '\n')
         print_aeropuerto(controller.infoaeropuerto(cont,lt.firstElement(gr.vertices(cont['rutas_idayretorno']))))
+        print('\n' + 'Ultimo aeropuerto del grafo' + '\n')
+        print_aeropuerto(controller.infoaeropuerto(cont,lt.lastElement(gr.vertices(cont['rutas_idayretorno']))))
 
         print('\n' +('-'*20)+ 'Informacion ciudades' +('-'*20)+ '\n')
         print('Total de ciudades: ' + str(lt.size(cont['ciudades'])))
+        print('\n' + 'Primera ciudad cargada' + '\n')
+        print_ciudades(lt.firstElement(cont['ciudades']))
         print('\n' + 'Ultima ciudad cargada' + '\n')
         print_ciudades(lt.lastElement(cont['ciudades']))
-
-        print('\n' + 'Primer aeropuerto del archivo' + '\n')
-        print_aeropuerto(lt.firstElement(cont['aeropuertosinfolista']))
 
     elif int(inputs[0]) == 3:
 
@@ -199,9 +202,13 @@ while True:
         print('aqui se ve a presentar la lista de areopuertos y el numero de aeropuertos conectados del grafo dirigido')
         print_aaeropuertos_conectados(respuesta[1])
 
+        print('\n' + 'El numero de aeropuertos conectados es de:' + str(lt.size(respuesta[2])))
         print('aqui se ve a presentar la lista de areopuertos y el numero de aeropuertos conectados del grafo no dirigido')
-        print('\n' + 'El numero de aeropuertos conectados es de:' + str(respuesta[2]))
-        print_aeropuerto(respuesta[3])
+        print_aaeropuertos_conectados(respuesta[3])
+
+        print('\n' + 'El numero de aeropuertos conectados es de:' + str(lt.size(respuesta[4])))
+        print('aqui se ve a presentar la lista de areopuertos y el numero de aeropuertos conectados en totalidad en ambos grafos')
+        print_aaeropuertos_conectados(respuesta[5])
 
     elif int(inputs[0]) == 4:
         
