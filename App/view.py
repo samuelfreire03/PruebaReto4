@@ -98,6 +98,42 @@ def print_ciudades_opciones(author):
     else:
         print('No se encontro el autor.\n')
 
+def print_aaeropuertos_conectados(aeropuertos):
+    """
+    Imprime la información del autor seleccionado
+    """
+    if aeropuertos == '':
+        print('No se encontraron artistas nacidos en el rango dado')
+    elif aeropuertos:
+        print("\n")
+        x = PrettyTable(["Nombre", "Ciudad", 'Pais','AITA','Total','Inbound','Outbound'])
+        x._max_width = {"Nombre" : 20, "Ciudad" : 20,"Pais" : 20, "AITA" : 20,"Total" : 20,"Inbound" : 20,"Outbound" : 20}
+        for aeropuerto in lt.iterator(aeropuertos):
+            valor = me.getValue(mp.get(cont['infoaeropuertos'],aeropuerto['aeropuerto']))
+            x.add_row([valor['Name']+'\n', valor['City'], valor['Country'],valor['IATA'],aeropuerto['cantidadtotal'],aeropuerto['cantidadentrada'],aeropuerto['cantidadsalida']])
+        print(x)
+        print("\n")
+    else:
+        print('No se encontro el autor.\n')
+
+def print_aeropuerto_LISTA(aeropuertos):
+    """
+    Imprime la información del autor seleccionado
+    """
+    if aeropuertos == '':
+        print('No se encontraron artistas nacidos en el rango dado')
+    elif aeropuertos:
+        print("\n")
+        x = PrettyTable(["IATA",'Nombre','Ciudad','Pais'])
+        x._max_width = {"IATA" : 20, "Nombre" : 20,"Ciudad" : 20, "Pais" : 20}
+        for aeropuerto in lt.iterator(aeropuertos):
+            info_aeropuerto = me.getValue(mp.get(cont['infoaeropuertos'],aeropuerto))
+            x.add_row([info_aeropuerto['IATA']+'\n', info_aeropuerto['Name'], info_aeropuerto['City'],info_aeropuerto['Country']])
+        print(x)
+        print("\n")
+    else:
+        print('No se encontro el autor.\n')
+
 
 """
 La vista se encarga de la interacción con el usuario
@@ -148,12 +184,6 @@ while True:
         print('\n' + 'Primer aeropuerto del grafo' + '\n')
         print_aeropuerto(controller.infoaeropuerto(cont,lt.firstElement(gr.vertices(cont['rutas_idayretorno']))))
 
-        print('\n' +('-'*20)+ 'Informacion grafo dirigido solo con una direccion y sin repeticion' +('-'*20)+ '\n')
-        print('Numero de aeropuertos: ' + str(gr.numVertices(cont['rutasconaerolineas'])))
-        print('Numero de rutas: ' + str(gr.numEdges(cont['rutasconaerolineas'])))
-        print('\n' + 'Primer aeropuerto del grafo' + '\n')
-        print_aeropuerto(controller.infoaeropuerto(cont,lt.firstElement(gr.vertices(cont['rutasconaerolineas']))))
-
         print('\n' +('-'*20)+ 'Informacion ciudades' +('-'*20)+ '\n')
         print('Total de ciudades: ' + str(lt.size(cont['ciudades'])))
         print('\n' + 'Ultima ciudad cargada' + '\n')
@@ -165,9 +195,9 @@ while True:
     elif int(inputs[0]) == 3:
 
         respuesta = controller.primer_req(cont)
+        print('\n' + 'El numero de aeropuertos conectados es de:' + str(lt.size(respuesta[0])))
         print('aqui se ve a presentar la lista de areopuertos y el numero de aeropuertos conectados del grafo dirigido')
-        print('\n' + 'El numero de aeropuertos conectados es de:' + str(respuesta[0]))
-        print_aeropuerto(respuesta[1])
+        print_aaeropuertos_conectados(respuesta[1])
 
         print('aqui se ve a presentar la lista de areopuertos y el numero de aeropuertos conectados del grafo no dirigido')
         print('\n' + 'El numero de aeropuertos conectados es de:' + str(respuesta[2]))
@@ -224,10 +254,15 @@ while True:
         
         codigo1 = input('Escriba el codigo del primer aeropuerto')
         respuesta = controller.quinto_req(cont,codigo1)
-        print('\n' + 'El numero de aeropuertos afectados es de:' + str(respuesta[0]))
-        print('\n' + 'La lista de aeropuertos afectados es la siguiente:')
-        for c in lt.iterator(respuesta[1]):
-            print(c)
+        print('\n' + 'El numero de rutas restantes es de (en el digrafo):' + str(respuesta[1]))
+        print('\n' + 'El numero de rutas restantes es de (en el GRAFO):' + str(respuesta[2]))
+        print('\n' + 'El numero de aeropuertos afectados:' + str(respuesta[0]))
+
+        print('\n' + 'La lista de los primeros 3 aeropuertos son los siguientes:')
+        print_aeropuerto_LISTA(respuesta[3])
+
+        print('\n' + 'La lista de los ultimos 3 aeropuertos son los siguientes:')
+        print_aeropuerto_LISTA(respuesta[4])
 
     else:
         sys.exit(0)

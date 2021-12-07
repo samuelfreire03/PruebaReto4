@@ -109,6 +109,7 @@ def newAnalyzer():
 def addVerticeGrafo(analyzer, aeropuerto):
 
     addStop(analyzer, aeropuerto['IATA'])
+    addStopidayvuelta(analyzer,aeropuerto['IATA'])
     mp.put(analyzer["infoaeropuertos"], aeropuerto['IATA'], aeropuerto)
     lt.addLast(analyzer['aeropuertosinfolista'], aeropuerto)
     addaeropuertoenciudad(analyzer,aeropuerto['City'],aeropuerto)
@@ -144,8 +145,6 @@ def addRutaidayvuleta(analyzer):
             lista_arcos = gr.adjacentEdges(analyzer['rutas'],vertice)
             for arco in lt.iterator(lista_arcos):
                 if arco['vertexB'] == vertices:
-                    addStopidayvuelta(analyzer,arco['vertexA'])
-                    addStopidayvuelta(analyzer,arco['vertexB'])
                     existe_arco = gr.getEdge(analyzer['rutas_idayretorno'],arco['vertexA'],arco['vertexB'])
                     if existe_arco is None:
                         gr.addEdge(analyzer['rutas_idayretorno'],arco['vertexA'],arco['vertexB'],float(arco['weight']))
@@ -209,6 +208,18 @@ def newaeropuerto(pubyear,distancia):
     entry['distancias'] = distancia
     return entry
 
+def newcantidad(aeropuerto,total,entrada,salida):
+    """
+    Esta funcion crea la estructura de libros asociados
+    a un año.
+    """
+    entry = {'aeropuerto': "", "distancias": ''}
+    entry['aeropuerto'] = aeropuerto
+    entry['cantidadtotal'] = total
+    entry['cantidadentrada'] = entrada
+    entry['cantidadsalida'] = salida
+    return entry
+
 # Funciones de consulta
 
 def infoaeropuerto(analyzer,codigoAita):
@@ -216,6 +227,29 @@ def infoaeropuerto(analyzer,codigoAita):
     llave_valor = mp.get(analyzer['infoaeropuertos'],codigoAita)
     informacion = me.getValue(llave_valor)
     return informacion
+
+def opciones_ciudades(analyzer,ciudad):
+
+    lista_opciones_origen = mp.get(analyzer['infociudadesrepetidas'],ciudad)
+
+    return lista_opciones_origen
+
+def aeropuertoopciones(analyzer,ciudad):
+
+    longitud = float(ciudad['lng'])
+    latitud = float(ciudad['lat'])
+    lista_distancias = lt.newList('ARRAY_LIST')
+    llave_valor = mp.get(analyzer['aeropuertosenciudades'],ciudad['city'])
+    lista_aeropuertos = me.getValue(llave_valor)['repetidas']
+    for c in lt.iterator(lista_aeropuertos):
+        lat_aeropuerto = float(c['Latitude'])
+        long_aeropuerto = float(c['Longitude'])
+        distancia = haversine(latitud,longitud,lat_aeropuerto,long_aeropuerto)
+        aeropuerto_dist = newaeropuerto(c['IATA'],distancia)
+        lt.addLast(lista_distancias,aeropuerto_dist)
+    orden = sortcomparedistancias(lista_distancias)
+    aeropuerto_cercano = lt.firstElement(orden)
+    return aeropuerto_cercano
 
 # Funciones utilizadas para comparar elementos dentro de una lista
 
@@ -255,6 +289,11 @@ def comparedistancias(ciudad1, ciudad2):
     fecha2 = ciudad2['distancias']
     return float(fecha1) < float(fecha2)
 
+def comparecantidad(ciudad1, ciudad2):
+    fecha1 = ciudad1['cantidadtotal']
+    fecha2 = ciudad2['cantidadtotal']
+    return float(fecha1) > float(fecha2)
+
 # Funciones de ordenamiento
 
 def sortcomparedistancias(catalog):
@@ -262,24 +301,30 @@ def sortcomparedistancias(catalog):
     sorted_list = merge.sort(catalog, comparedistancias)
     return sorted_list
 
+def sortcomparecanitdades(catalog):
+
+    sorted_list = merge.sort(catalog, comparecantidad)
+    return sorted_list
+
 #Funciones de requerimientos
 
 def primer_req(analyzer):
 
 #GRAFO DIRIGIDO
-    vertices_total = gr.vertices(analyzer['rutasconaerolineas'])
-    mayor_numero1 = 0
-    mayor_aeropuerto1 = None
+    vertices_total = gr.vertices(analyzer['rutas'])
+    lista_canitdad_digrafo = lt.newList('ARRAY_LIST')
     for vertice in lt.iterator(vertices_total):
-        entran = gr.indegree(analyzer['rutasconaerolineas'],vertice)
-        salen = gr.outdegree(analyzer['rutasconaerolineas'],vertice)
+        entran = gr.indegree(analyzer['rutas'],vertice)
+        salen = gr.outdegree(analyzer['rutas'],vertice)
         total_rutas = entran + salen
-        if float(total_rutas) > mayor_numero1:
-            mayor_numero1 = float(total_rutas)
-            mayor_aeropuerto1 = vertice
-    llave_valor_vertice = mp.get(analyzer['rutasconaerolineas']['vertices'], mayor_aeropuerto1)
-    lst1 = me.getValue(llave_valor_vertice)
-    info_mayor1 = me.getValue(mp.get(analyzer['infoaeropuertos'],mayor_aeropuerto1))
+        cantidad = newcantidad(vertice,total_rutas,entran,salen)
+        lt.addLast(lista_canitdad_digrafo,cantidad)
+    orden = sortcomparecanitdades(lista_canitdad_digrafo)
+    primeros5 = lt.subList(orden,1,5)
+    conectados_numero_interno = lt.newList('ARRAY_LIST')
+    for c in lt.iterator(orden):
+        if c['cantidadtotal'] != 0:
+            lt.addLast(conectados_numero_interno,c)
 
 #GRAFO NO DIRIGIDO
     vertices_total_no = gr.vertices(analyzer['rutas_idayretorno'])
@@ -293,7 +338,7 @@ def primer_req(analyzer):
     llave_valor_vertice1 = mp.get(analyzer['rutas_idayretorno']['vertices'], mayor_aeropuerto2)
     lst2 = me.getValue(llave_valor_vertice1)
     info_mayor2 = me.getValue(mp.get(analyzer['infoaeropuertos'],mayor_aeropuerto2))
-    return mayor_numero1,info_mayor1,mayor_numero2,info_mayor2
+    return conectados_numero_interno,primeros5,mayor_numero2,info_mayor2
 
 def segundo_req(analyzer,codigo1,codigo2):
 
@@ -345,42 +390,26 @@ def cuarto_req(analyzer,codigo1,millas):
 
     return nodos,total,lista,ciudades
 
-def quinto_req(analyzer,codigo1):
+def quinto_req(analyzer,codigo):
 
-    entran = gr.indegree(analyzer['rutasconaerolineas'],codigo1)
-    salen = gr.outdegree(analyzer['rutasconaerolineas'],codigo1)
+#Grafo no dirigido
+
+    numero_afectados = lt.size(gr.adjacents(analyzer['rutas_idayretorno'],codigo))
+    afectados = gr.adjacents(analyzer['rutas_idayretorno'],codigo)
+
+#Grafo dirigido
+
+    entran = gr.indegree(analyzer['rutas'],codigo)
+    salen = gr.outdegree(analyzer['rutas'],codigo)
     total_rutas = entran + salen
+    restantes_digrafo = gr.numEdges(analyzer['rutas'])-total_rutas
 
-    arcos_totales = gr.edges(analyzer['rutasconaerolineas'])
+    restantes_grafo = gr.numEdges(analyzer['rutas_idayretorno'])-numero_afectados
 
-    lista_aeropuetos = lt.newList('ARRAY_LIST')
-    for c in lt.iterator(arcos_totales):
-        if c['vertexA'] == codigo1:
-            lt.addLast(lista_aeropuetos,c['vertexB'])
-        if c['vertexB'] == codigo1:
-            lt.addLast(lista_aeropuetos,c['vertexA']) 
-
-    return total_rutas,lista_aeropuetos
-
-def opciones_ciudades(analyzer,ciudad):
-
-    lista_opciones_origen = mp.get(analyzer['infociudadesrepetidas'],ciudad)
-
-    return lista_opciones_origen
-
-def aeropuertoopciones(analyzer,ciudad):
-
-    longitud = float(ciudad['lng'])
-    latitud = float(ciudad['lat'])
-    lista_distancias = lt.newList('ARRAY_LIST')
-    llave_valor = mp.get(analyzer['aeropuertosenciudades'],ciudad['city'])
-    lista_aeropuertos = me.getValue(llave_valor)['repetidas']
-    for c in lt.iterator(lista_aeropuertos):
-        lat_aeropuerto = float(c['Latitude'])
-        long_aeropuerto = float(c['Longitude'])
-        distancia = haversine(latitud,longitud,lat_aeropuerto,long_aeropuerto)
-        aeropuerto_dist = newaeropuerto(c['IATA'],distancia)
-        lt.addLast(lista_distancias,aeropuerto_dist)
-    orden = sortcomparedistancias(lista_distancias)
-    aeropuerto_cercano = lt.firstElement(orden)
-    return aeropuerto_cercano
+    if lt.size(afectados) >= 6:
+        primeros = lt.subList(afectados,1,3)
+        ultimos = lt.subList(afectados,lt.size(afectados)-2,3)
+    else: 
+        primeros = afectados
+        ultimos = afectados
+    return numero_afectados,restantes_digrafo,restantes_grafo,primeros,ultimos
