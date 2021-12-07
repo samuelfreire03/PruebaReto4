@@ -261,15 +261,26 @@ while True:
         
         codigo1 = input('Escriba el codigo del primer aeropuerto')
         respuesta = controller.quinto_req(cont,codigo1)
-        print('\n' + 'El numero de rutas restantes es de (en el digrafo):' + str(respuesta[1]))
-        print('\n' + 'El numero de rutas restantes es de (en el GRAFO):' + str(respuesta[2]))
-        print('\n' + 'El numero de aeropuertos afectados:' + str(respuesta[0]))
+        print('\n' + 'El numero de rutas restantes es de (en el digrafo):' + str(respuesta[0]))
+        print('\n' + 'El numero de rutas restantes es de (en el grafo no dirigido):' + str(respuesta[1]))
 
+        print('\n' + 'El numero de aeropuertos afectados en totalidad:' + str(respuesta[8]))
+        print('\n' + 'La lista de los primeros 3 aeropuertos son los siguientes:')
+        print_aeropuerto_LISTA(respuesta[9])
+        print('\n' + 'La lista de los ultimos 3 aeropuertos son los siguientes:')
+        print_aeropuerto_LISTA(respuesta[10])
+
+        print('\n' + 'El numero de aeropuertos afectados en el grafo no dirigido:' + str(respuesta[2]))
         print('\n' + 'La lista de los primeros 3 aeropuertos son los siguientes:')
         print_aeropuerto_LISTA(respuesta[3])
-
         print('\n' + 'La lista de los ultimos 3 aeropuertos son los siguientes:')
         print_aeropuerto_LISTA(respuesta[4])
+
+        print('\n' + 'El numero de aeropuertos afectados en el grafo dirigido:' + str(respuesta[5]))
+        print('\n' + 'La lista de los primeros 3 aeropuertos son los siguientes:')
+        print_aeropuerto_LISTA(respuesta[6])
+        print('\n' + 'La lista de los ultimos 3 aeropuertos son los siguientes:')
+        print_aeropuerto_LISTA(respuesta[7])
 
     else:
         sys.exit(0)

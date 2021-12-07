@@ -408,24 +408,67 @@ def cuarto_req(analyzer,codigo1,millas):
 
 def quinto_req(analyzer,codigo):
 
+
+    lista_total = lt.newList('ARRAY_LIST')
 #Grafo no dirigido
 
-    numero_afectados = lt.size(gr.adjacents(analyzer['rutas_idayretorno'],codigo))
-    afectados = gr.adjacents(analyzer['rutas_idayretorno'],codigo)
+    numero_afectados_nodiri = lt.size(gr.adjacents(analyzer['rutas_idayretorno'],codigo))
+    afectados_nodiri = gr.adjacents(analyzer['rutas_idayretorno'],codigo)
+
+    for c in lt.iterator(afectados_nodiri):
+        lt.addLast(lista_total,c)
 
 #Grafo dirigido
 
     entran = gr.indegree(analyzer['rutas'],codigo)
     salen = gr.outdegree(analyzer['rutas'],codigo)
-    total_rutas = entran + salen
-    restantes_digrafo = gr.numEdges(analyzer['rutas'])-total_rutas
+    total_afectados_diri = entran + salen
+    afectados_diri = lt.newList('ARRAY_LIST')
+    arcos_total = gr.edges(analyzer['rutas'])
+    for c in lt.iterator(arcos_total):
+        if c['vertexA'] == codigo:
+            existe = lt.isPresent(afectados_diri,c['vertexB'])
+            if existe == 0:
+                lt.addLast(afectados_diri,c['vertexB'])
+                lt.addLast(lista_total,c['vertexB'])
+        if c['vertexB'] == codigo:
+            existe = lt.isPresent(afectados_diri,c['vertexA'])
+            if existe == 0:
+                lt.addLast(afectados_diri,c['vertexA'])
+                lt.addLast(lista_total,c['vertexA'])
+    numero_afectados_diri = lt.size(afectados_diri)
 
-    restantes_grafo = gr.numEdges(analyzer['rutas_idayretorno'])-numero_afectados
+#restantes
+    restantes_digrafo = gr.numEdges(analyzer['rutas'])-total_afectados_diri
+    restantes_grafo = gr.numEdges(analyzer['rutas_idayretorno'])-numero_afectados_nodiri
 
-    if lt.size(afectados) >= 6:
-        primeros = lt.subList(afectados,1,3)
-        ultimos = lt.subList(afectados,lt.size(afectados)-2,3)
+#impresion no dirigido
+    if lt.size(afectados_nodiri) >= 6:
+        primeros_nodiri = lt.subList(afectados_nodiri,1,3)
+        ultimos_nodiri = lt.subList(afectados_nodiri,lt.size(afectados_nodiri)-2,3)
     else: 
-        primeros = afectados
-        ultimos = afectados
-    return numero_afectados,restantes_digrafo,restantes_grafo,primeros,ultimos
+        primeros_nodiri = afectados_nodiri
+        ultimos_nodiri = afectados_nodiri
+
+#impresion dirigido
+    if lt.size(afectados_diri) >= 6:
+        primeros_diri = lt.subList(afectados_diri,1,3)
+        ultimos_diri = lt.subList(afectados_diri,lt.size(afectados_diri)-2,3)
+    else: 
+        primeros_diri = afectados_diri
+        ultimos_diri = afectados_diri
+
+#total
+
+    numero_afectados_toal = numero_afectados_diri + numero_afectados_nodiri
+
+#impresion total
+    if lt.size(lista_total) >= 6:
+        primeros_total = lt.subList(lista_total,1,3)
+        ultimos_total = lt.subList(lista_total,lt.size(lista_total)-2,3)
+    else: 
+        primeros_total = lista_total
+        ultimos_total = lista_total
+
+
+    return restantes_digrafo,restantes_grafo,numero_afectados_nodiri,primeros_nodiri,ultimos_nodiri,numero_afectados_diri,primeros_diri,ultimos_diri,numero_afectados_toal,primeros_total,ultimos_total
