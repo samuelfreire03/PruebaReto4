@@ -271,6 +271,8 @@ while True:
         aeropuerto1 = controller.aeropuertoopciones(cont,info_ciudad_origen)
         millas = input('Escriba la cantidad de millas qeu tiene')
         respuesta = controller.cuarto_req(cont,aeropuerto1['aeropuerto'],millas)
+        print('\n' + 'El numero de nodos conectados es:' + str(respuesta[0]))
+        print('\n' + 'El costo total de la red de expansion es de:' + str(respuesta[1]))
         print_camino(respuesta[2])
         print('\n' + respuesta[3] + 'millas para la ruta mas larga')
 
