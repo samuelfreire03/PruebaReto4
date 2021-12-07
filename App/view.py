@@ -217,7 +217,7 @@ while True:
         codigo2 = input('Escriba el codigo del segundo aeropuerto')
         respuesta = controller.segundo_req(cont,codigo1,codigo2)
         print('\n' + 'El numero de elementos fuertemente conectados es de:' + str(respuesta[0]))
-        print('\n' + 'Los dos vertices estan fuertemente conectados:' + str(respuesta[1]))
+        print('\n' + 'Los dos vertices pertenecen al mismo cluster:' + str(respuesta[1]))
 
     elif int(inputs[0]) == 5:
         
