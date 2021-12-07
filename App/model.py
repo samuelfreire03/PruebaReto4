@@ -396,15 +396,7 @@ def cuarto_req(analyzer,codigo1,millas):
                 mayor_distacnia =  cantidad
                 lista = camino_revisar
 
-#informacion de ciudades
-
-    ciudades = lt.newList('ARRAY_LIST')
-    for aeropuerto in lt.iterator(camino):
-        informacion = me.getValue(mp.get(analyzer['infoaeropuertos'],aeropuerto['vertexB']))
-        ciudad = informacion['City']
-        lt.addLast(ciudades,ciudad)
-
-    return nodos,total,lista,ciudades
+    return nodos,total,lista
 
 def quinto_req(analyzer,codigo):
 

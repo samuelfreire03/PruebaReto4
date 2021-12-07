@@ -99,12 +99,12 @@ def segundo_req(analyzer,codigo1,codigo2):
     conectados = model.segundo_req(analyzer,codigo1,codigo2)
     return conectados
 
-def cuarto_req(analyzer,codigo1,millas):
+def cuarto_req(analyzer,codigo,millas):
     """
     Retorna los libros que fueron publicados
     en un año
     """
-    caminos = model.cuarto_req(analyzer,codigo1,millas)
+    caminos = model.cuarto_req(analyzer,codigo,millas)
     return caminos
 
 def quinto_req(analyzer,codigo):

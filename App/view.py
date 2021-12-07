@@ -253,9 +253,6 @@ while True:
         print('\n' + 'La rama mas larga es la siguiente:')
         for c in lt.iterator(respuesta[2]):
             print(c)
-        print('\n' + 'Las ciudades que se pueden visitar son:')
-        for c in lt.iterator(respuesta[3]):
-            print(c)
 
     elif int(inputs[0]) == 7:
         
