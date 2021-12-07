@@ -262,9 +262,15 @@ while True:
     elif int(inputs[0]) == 6:
         
         print('aqui se ve a presentar la red expansion minima')
-        codigo1 = input('Escriba el codigo del primer aeropuerto')
+        ciudad1 = input('Escriba el nombre de la ciudad de origen')
+        opcion_origen = controller.opciones_ciudades(cont,ciudad1)
+        print_opciones(opcion_origen)
+        ciudad_origen = input('Escriba la opcion de la tabla de arriba que desea buscar')
+        info_ciudad_origen = lt.getElement(me.getValue(opcion_origen)['repetidas'],int(ciudad_origen))
+        print_ciudades_opciones(info_ciudad_origen)
+        aeropuerto1 = controller.aeropuertoopciones(cont,info_ciudad_origen)
         millas = input('Escriba la cantidad de millas qeu tiene')
-        respuesta = controller.cuarto_req(cont,codigo1,millas)
+        respuesta = controller.cuarto_req(cont,aeropuerto1['aeropuerto'],millas)
         print_camino(respuesta[2])
         print('\n' + respuesta[3] + 'millas para la ruta mas larga')
 
